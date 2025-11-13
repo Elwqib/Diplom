@@ -1,0 +1,20 @@
+# CMake
+out/
+build/
+CMakeCache.txt
+CMakeFiles/
+*.cmake
+
+# VS Code
+.vscode/
+
+# Исполняемые файлы
+*.exe
+*.dll
+*.pdb
+*.ilk
+*.obj
+
+# Временные файлы
+*.tmp
+*.log
