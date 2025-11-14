@@ -2,26 +2,29 @@
 #include <fstream>
 
 bool DocxAnalyzer::canAnalyze(const fs::path& path) const {
-    return path.extension().string() == ".docx";
+    std::string ext = path.extension().string();
+    return ext == ".docx" || ext == ".DOCX";
 }
 
 FileMetadata DocxAnalyzer::analyze(const fs::path& path) {
-    FileMetadata meta;
+    FileMetadata meta(path);
     addBasicInfo(meta, path);
 
-    std::ifstream file(path.string(), std::ios::binary);
+    std::ifstream file(path, std::ios::binary);
     if (!file) {
-        meta.data["DOCX"] = "Failed to open file";
+        meta.setError("Не удалось открыть файл");
         return meta;
     }
 
-    char signature[2] = {0};
-    file.read(signature, 2);
-    if (file.gcount() != 2 || signature[0] != 'P' || signature[1] != 'K') {
-        meta.data["DOCX"] = "Not a ZIP archive";
+    char sig[4] = {};
+    file.read(sig, 4);
+    if (file.gcount() < 4 || sig[0] != 'P' || sig[1] != 'K') {
+        meta.setError("Не является ZIP-архивом (не DOCX)");
         return meta;
     }
 
-    meta.data["DOCX"] = "Valid DOCX (ZIP archive)";
+    meta.set("Формат", "Valid DOCX (ZIP-архив)");
+    meta.set("Статус", "OK");
+
     return meta;
 }

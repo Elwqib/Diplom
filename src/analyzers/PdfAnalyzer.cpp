@@ -1,5 +1,6 @@
 #include "PdfAnalyzer.h"
 #include <fstream>
+#include <regex>
 #include <sstream>
 
 bool PdfAnalyzer::canAnalyze(const fs::path& path) const {
@@ -7,48 +8,41 @@ bool PdfAnalyzer::canAnalyze(const fs::path& path) const {
 }
 
 FileMetadata PdfAnalyzer::analyze(const fs::path& path) {
-    FileMetadata meta;
+    FileMetadata meta(path);
     addBasicInfo(meta, path);
 
-    std::ifstream file(path.string(), std::ios::binary);
+    std::ifstream file(path, std::ios::binary);
     if (!file) {
-        meta.data["PDF"] = "Failed to open file";
+        meta.setError("Не удалось открыть файл");
         return meta;
     }
 
-    std::stringstream buffer;
+    std::ostringstream buffer;
     buffer << file.rdbuf();
     std::string content = buffer.str();
 
-    json info;
-    size_t pos = content.find("/Title");
-    if (pos != std::string::npos) {
-        size_t start = content.find("(", pos);
-        size_t end = content.find(")", start);
-        if (start != std::string::npos && end != std::string::npos) {
-            info["Title"] = content.substr(start + 1, end - start - 1);
-        }
+    if (content.find("%PDF") != 0) {
+        meta.setError("Не является PDF-файлом");
+        return meta;
     }
 
-    pos = content.find("/Author");
-    if (pos != std::string::npos) {
-        size_t start = content.find("(", pos);
-        size_t end = content.find(")", start);
-        if (start != std::string::npos && end != std::string::npos) {
-            info["Author"] = content.substr(start + 1, end - start - 1);
-        }
+    std::regex r(R"((/(Author|Creator|Title|CreationDate|ModDate|Producer)\s*\(([^)]+)\)))");
+    std::sregex_iterator iter(content.begin(), content.end(), r);
+    std::sregex_iterator end;
+
+    for (; iter != end; ++iter) {
+        std::string key = (*iter)[1].str();
+        std::string val = (*iter)[2].str();
+
+        if (key == "Author") meta.set("Автор", val);
+        else if (key == "Creator") meta.set("Создатель", val);
+        else if (key == "Title") meta.set("Заголовок", val);
+        else if (key == "CreationDate") meta.set("Дата создания", val);
+        else if (key == "ModDate") meta.set("Дата изменения", val);
+        else if (key == "Producer") meta.set("Программа", val);
     }
 
-    // Count pages (simplified)
-    int pages = 0;
-    pos = 0;
-    while ((pos = content.find("/Type /Page", pos)) != std::string::npos) {
-        pages++;
-        pos += 11;
-    }
-    info["Pages"] = pages > 0 ? pages : 1;
+    meta.set("Защищён паролем", content.find("/Encrypt") != std::string::npos);
 
-    info["FileSize"] = content.size();
-    meta.data["PDF"] = info;
     return meta;
 }

@@ -1,18 +1,24 @@
 cmake_minimum_required(VERSION 3.21)
-project(DIPLOM_CMAKE LANGUAGES CXX)
 
-cmake_policy(SET CMP0167 OLD)
+# ОБЯЗАТЕЛЬНО ДО project()
+set(CMAKE_TOOLCHAIN_FILE 
+    "C:/vcpkg/vcpkg/scripts/buildsystems/vcpkg.cmake" 
+    CACHE STRING "vcpkg toolchain file"
+)
+
+project(DIPLOM_CMAKE LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# vcpkg toolchain
-set(CMAKE_TOOLCHAIN_FILE "C:/vcpkg/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
+# Поиск пакетов
+find_package(Boost REQUIRED COMPONENTS filesystem)
+find_package(taglib CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
+find_package(exiv2 CONFIG REQUIRED)
+find_package(duckx CONFIG REQUIRED)
 
-# Указываем, где искать библиотеки
-set(CMAKE_PREFIX_PATH "C:/vcpkg/vcpkg/installed/x64-windows")
-
-# add_executable ДО target_*
+# Исполняемый файл
 add_executable(${PROJECT_NAME}
     src/main.cpp
     src/analyzers/BaseAnalyzer.cpp
@@ -22,22 +28,15 @@ add_executable(${PROJECT_NAME}
     src/analyzers/DocxAnalyzer.cpp
 )
 
-# find_package ПОСЛЕ toolchain
-find_package(Boost REQUIRED COMPONENTS filesystem program_options)
-find_package(taglib CONFIG REQUIRED)
-find_package(tinyxml2 CONFIG REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
+target_include_directories(${PROJECT_NAME} PRIVATE src)
 
-# target_* ПОСЛЕ add_executable
-target_include_directories(${PROJECT_NAME} PRIVATE
-    src
-    "C:/vcpkg/vcpkg/installed/x64-windows/include"
-)
-
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(${PROJECT_NAME} PRIVATE
     Boost::filesystem
-    Boost::program_options
     TagLib::TagLib
-    tinyxml2::tinyxml2
     nlohmann_json::nlohmann_json
+    exiv2lib  
+    duckx::duckx
 )
+
+# UTF-8
+target_compile_options(${PROJECT_NAME} PRIVATE /utf-8)
