@@ -1,0 +1,3 @@
+C:/Users/аро/Desktop/Prorgrams/DIPLOM_CMAKE_0.0.2/out/build/x64-debug/CMakeFiles/MetadataAnalyzer.dir
+C:/Users/аро/Desktop/Prorgrams/DIPLOM_CMAKE_0.0.2/out/build/x64-debug/CMakeFiles/ALL_BUILD.dir
+C:/Users/аро/Desktop/Prorgrams/DIPLOM_CMAKE_0.0.2/out/build/x64-debug/CMakeFiles/ZERO_CHECK.dir
