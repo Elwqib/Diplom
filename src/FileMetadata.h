@@ -31,21 +31,15 @@ public:
 
     nlohmann::json toJson() const {
         nlohmann::json j;
-        j["file"] = path.string();
+        j["file"] = path.u8string();
         j["error"] = error;
 
         nlohmann::json meta;
         for (const auto& [k, v] : data) {
             std::visit([&meta, k](const auto& arg) {
                 using T = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<T, std::string>)
-                    meta[k] = arg;
-                else if constexpr (std::is_same_v<T, int64_t>)
-                    meta[k] = arg;
-                else if constexpr (std::is_same_v<T, double>)
-                    meta[k] = arg;
-                else if constexpr (std::is_same_v<T, bool>)
-                    meta[k] = arg;
+                if constexpr (std::is_same_v<T, std::string>) meta[k] = arg;
+                else meta[k] = arg;
             }, v);
         }
         j["metadata"] = meta;
@@ -54,27 +48,17 @@ public:
 
     std::string toString() const {
         std::ostringstream oss;
-        oss << "Файл: " << path.filename().string() << "\n";
-        if (!error.empty()) {
-            oss << "ОШИБКА: " << error << "\n";
-        }
-
+        oss << "Файл: " << path.filename().u8string() << "\n";
+        if (!error.empty()) oss << "ОШИБКА: " << error << "\n";
         for (const auto& [k, v] : data) {
             oss << k << ": ";
             std::visit([&oss](const auto& arg) {
                 using T = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<T, std::string>)
-                    oss << arg;
-                else if constexpr (std::is_same_v<T, int64_t>)
-                    oss << arg;
-                else if constexpr (std::is_same_v<T, double>)
-                    oss << arg;
-                else if constexpr (std::is_same_v<T, bool>)
-                    oss << (arg ? "true" : "false");
+                if constexpr (std::is_same_v<T, std::string>) oss << arg;
+                else oss << arg;
             }, v);
             oss << "\n";
         }
-        oss << "\n";
         return oss.str();
     }
 };

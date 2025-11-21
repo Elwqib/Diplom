@@ -13,35 +13,50 @@ FileMetadata JpegAnalyzer::analyze(const fs::path& path) {
     addBasicInfo(meta, path);
 
     try {
-        auto image = Exiv2::ImageFactory::open(path.string());
+        Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(path.u8string());
+        if (!image) {
+            meta.setError("Не удалось открыть изображение");
+            return meta;
+        }
+
         image->readMetadata();
-        Exiv2::ExifData& exif = image->exifData();
+        const Exiv2::ExifData& exif = image->exifData();
 
-        meta.set("Ширина", image->pixelWidth());
-        meta.set("Высота", image->pixelHeight());
+        if (exif.empty()) {
+            meta.set("EXIF", "Отсутствует");
+            return meta;
+        }
 
-        if (auto it = exif.findKey(Exiv2::ExifKey("Exif.Photo.DateTimeOriginal")); it != exif.end())
-            meta.set("Дата съёмки", it->toString());
+        auto get = [&](const std::string& key) -> std::string {
+            auto it = exif.findKey(Exiv2::ExifKey(key));
+            if (it == exif.end()) return "";
+            return it->toString();
+        };
 
-        if (auto make = exif.findKey(Exiv2::ExifKey("Exif.Image.Make")); make != exif.end())
-            if (auto model = exif.findKey(Exiv2::ExifKey("Exif.Image.Model")); model != exif.end())
-                meta.set("Камера", make->toString() + " " + model->toString());
+        auto setIf = [&](const std::string& title, const std::string& key) {
+            std::string val = get(key);
+            if (!val.empty()) meta.set(title, val);
+        };
+
+        setIf("Дата съёмки", "Exif.Photo.DateTimeOriginal");
+        setIf("Камера", "Exif.Image.Make");
+        setIf("Модель камеры", "Exif.Image.Model");
+        setIf("ISO", "Exif.Photo.ISOSpeedRatings");
+        setIf("Выдержка", "Exif.Photo.ExposureTime");
+        setIf("Диафрагма", "Exif.Photo.FNumber");
+        setIf("Фокусное расстояние", "Exif.Photo.FocalLength");
 
         // GPS
-        try {
-            std::string lat = exif["Exif.GPSInfo.GPSLatitude"].toString();
-            std::string lon = exif["Exif.GPSInfo.GPSLongitude"].toString();
-            if (!lat.empty() && !lon.empty()) {
-                std::string latRef = exif["Exif.GPSInfo.GPSLatitudeRef"].toString();
-                std::string lonRef = exif["Exif.GPSInfo.GPSLongitudeRef"].toString();
-                meta.set("Геолокация", latRef + " " + lat + ", " + lonRef + " " + lon);
-            }
-        } catch (...) {}
+        std::string lat = get("Exif.GPSInfo.GPSLatitude");
+        std::string lon = get("Exif.GPSInfo.GPSLongitude");
+        std::string latRef = get("Exif.GPSInfo.GPSLatitudeRef");
+        std::string lonRef = get("Exif.GPSInfo.GPSLongitudeRef");
+        if (!lat.empty() && !lon.empty()) {
+            meta.set("Геолокация", latRef + " " + lat + ", " + lonRef + " " + lon);
+        }
 
-    } catch (const std::exception& e) {
-        meta.setError(std::string("Ошибка EXIF: ") + e.what());
     } catch (...) {
-        meta.setError("Неизвестная ошибка при чтении EXIF");
+        meta.setError("Ошибка чтения EXIF");
     }
 
     return meta;

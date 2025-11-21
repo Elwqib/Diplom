@@ -18,11 +18,11 @@ std::string BaseAnalyzer::formatTime(const fs::file_time_type& ftime) {
 
 void BaseAnalyzer::addBasicInfo(FileMetadata& meta, const fs::path& path) {
     try {
-        meta.set("Полный путь", path.string());
-        meta.set("Имя файла", path.filename().string());
+        meta.set("Полный путь", path.u8string());
+        meta.set("Имя файла", path.filename().u8string());
         meta.set("Размер (байт)", static_cast<int64_t>(fs::file_size(path)));
         meta.set("Изменён", formatTime(fs::last_write_time(path)));
-        meta.set("Расширение", path.extension().string());
+        meta.set("Расширение", path.extension().u8string());
     } catch (...) {
         meta.setError("Файл недоступен или повреждён");
     }
