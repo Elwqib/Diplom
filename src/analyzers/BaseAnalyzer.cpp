@@ -2,6 +2,7 @@
 #include <sstream>
 #include <iomanip>
 #include <chrono>
+#include <fstream>
 
 std::string BaseAnalyzer::formatTime(const fs::file_time_type& ftime) {
     try {
@@ -16,13 +17,55 @@ std::string BaseAnalyzer::formatTime(const fs::file_time_type& ftime) {
     }
 }
 
+void BaseAnalyzer::addIntegrityInfo(FileMetadata& meta, const fs::path& path) {
+    try {
+        std::ifstream in(path, std::ios::binary);
+        if (!in) return;
+
+        uint32_t crc = 0xFFFFFFFFu;
+        char buffer[4096];
+
+        auto updateCrc = [&crc](const char* data, std::streamsize len) {
+            for (std::streamsize i = 0; i < len; ++i) {
+                uint8_t byte = static_cast<uint8_t>(data[i]);
+                crc ^= byte;
+                for (int j = 0; j < 8; ++j) {
+                    uint32_t mask = -(crc & 1u);
+                    crc = (crc >> 1) ^ (0xEDB88320u & mask);
+                }
+            }
+        };
+
+        while (in) {
+            in.read(buffer, sizeof(buffer));
+            std::streamsize got = in.gcount();
+            if (got > 0) updateCrc(buffer, got);
+        }
+
+        crc ^= 0xFFFFFFFFu;
+
+        std::ostringstream oss;
+        oss << std::hex << std::uppercase << std::setfill('0') << std::setw(8) << crc;
+        meta.set("CRC32", oss.str());
+    } catch (...) {
+        // игнорируем ошибки при подсчёте
+    }
+}
+
 void BaseAnalyzer::addBasicInfo(FileMetadata& meta, const fs::path& path) {
     try {
         meta.set("Полный путь", path.u8string());
         meta.set("Имя файла", path.filename().u8string());
-        meta.set("Размер (байт)", static_cast<int64_t>(fs::file_size(path)));
+        auto size = fs::file_size(path);
+        meta.set("Размер (байт)", static_cast<int64_t>(size));
         meta.set("Изменён", formatTime(fs::last_write_time(path)));
         meta.set("Расширение", path.extension().u8string());
+        if (size == 0) {
+            meta.set("Файл пустой", true);
+        }
+
+        // здесь же добавляем базовую проверку целостности
+        addIntegrityInfo(meta, path);
     } catch (...) {
         meta.setError("Файл недоступен или повреждён");
     }

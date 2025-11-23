@@ -19,6 +19,15 @@
     <ClCompile Include="C:\Users\аро\Desktop\Prorgrams\DIPLOM_CMAKE_0.0.2\src\analyzers\DocxAnalyzer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\аро\Desktop\Prorgrams\DIPLOM_CMAKE_0.0.2\src\analyzers\ZipAnalyzer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\аро\Desktop\Prorgrams\DIPLOM_CMAKE_0.0.2\src\analyzers\PsdAnalyzer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\аро\Desktop\Prorgrams\DIPLOM_CMAKE_0.0.2\src\analyzers\Mp4Analyzer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="C:\Users\аро\Desktop\Prorgrams\DIPLOM_CMAKE_0.0.2\CMakeLists.txt" />

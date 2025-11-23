@@ -294,20 +294,11 @@ boost_variant2_DIR:PATH=C:/vcpkg/vcpkg/installed/x64-windows/share/boost_variant
 //The directory containing a CMake configuration file for boost_winapi.
 boost_winapi_DIR:PATH=C:/vcpkg/vcpkg/installed/x64-windows/share/boost_winapi
 
-//The directory containing a CMake configuration file for duckx.
-duckx_DIR:PATH=C:/vcpkg/vcpkg/installed/x64-windows/share/duckx
-
 //The directory containing a CMake configuration file for exiv2.
 exiv2_DIR:PATH=C:/vcpkg/vcpkg/installed/x64-windows/share/exiv2
 
-//The directory containing a CMake configuration file for libzip.
-libzip_DIR:PATH=C:/vcpkg/vcpkg/installed/x64-windows/share/libzip
-
 //The directory containing a CMake configuration file for nlohmann_json.
 nlohmann_json_DIR:PATH=C:/vcpkg/vcpkg/installed/x64-windows/share/nlohmann_json
-
-//The directory containing a CMake configuration file for pugixml.
-pugixml_DIR:PATH=C:/vcpkg/vcpkg/installed/x64-windows/share/pugixml
 
 //The directory containing a CMake configuration file for taglib.
 taglib_DIR:PATH=C:/vcpkg/vcpkg/installed/x64-windows/share/taglib

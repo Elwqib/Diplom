@@ -22,6 +22,9 @@
 #include "analyzers/AudioAnalyzer.h"
 #include "analyzers/PdfAnalyzer.h"
 #include "analyzers/DocxAnalyzer.h"
+#include "analyzers/ZipAnalyzer.h"
+#include "analyzers/PsdAnalyzer.h"
+#include "analyzers/Mp4Analyzer.h"
 
 namespace fs = std::filesystem;
 
@@ -30,8 +33,16 @@ namespace fs = std::filesystem;
 // ====================================================
 
 const std::vector<std::string> SUPPORTED_EXTENSIONS = {
-    ".jpg", ".jpeg", ".pdf", ".docx",
-    ".mp3", ".flac", ".wav", ".ogg", ".m4a", ".aac", ".wma"
+    // изображения
+    ".jpg", ".jpeg", ".png", ".tif", ".tiff",
+    // документы
+    ".pdf", ".docx",
+    // аудио
+    ".mp3", ".flac", ".wav", ".ogg", ".m4a", ".aac", ".wma",
+    // видео / контейнеры
+    ".mp4", ".m4v", ".mov",
+    // архивы / графические форматы
+    ".zip", ".psd"
 };
 
 enum class OutputFormat { Console, Txt, Json, Xml };
@@ -79,12 +90,16 @@ bool isSupportedExtension(const std::string& extLower) {
 void printSupportedExtensions() {
     system("cls");
     std::cout << "\nПоддерживаемые форматы:\n\n";
-    std::cout << "Изображения: .jpg .jpeg\n";
+    std::cout << "Изображения: .jpg .jpeg .png .tif .tiff\n";
     std::cout << "Документы:   .pdf .docx\n";
-    std::cout << "Аудио:       .mp3 .flac .wav .ogg .m4a .aac .wma\n\n";
-    std::cout << "Нажмите Enter...";
+    std::cout << "Аудио:       .mp3 .flac .wav .ogg .m4a .aac .wma\n";
+    std::cout << "Видео:       .mp4 .m4v .mov\n";
+    std::cout << "Архивы:      .zip\n";
+    std::cout << "Графика:     .psd\n\n";
+    std::cout << "Нажмите Enter.";
     std::cin.get();
 }
+
 
 // Безопасное variant → string
 std::string variantToString(const Value& v) {
@@ -238,6 +253,10 @@ int main(int argc, char* argv[]) {
     analyzers.emplace_back(std::make_unique<AudioAnalyzer>());
     analyzers.emplace_back(std::make_unique<PdfAnalyzer>());
     analyzers.emplace_back(std::make_unique<DocxAnalyzer>());
+    analyzers.emplace_back(std::make_unique<Mp4Analyzer>());
+    analyzers.emplace_back(std::make_unique<ZipAnalyzer>());
+    analyzers.emplace_back(std::make_unique<PsdAnalyzer>());
+    
 
     fs::create_directories("results");
 

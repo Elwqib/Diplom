@@ -12,4 +12,6 @@ public:
 protected:
     static void addBasicInfo(FileMetadata& meta, const fs::path& path);
     static std::string formatTime(const fs::file_time_type& ftime);
+    
+    static void addIntegrityInfo(FileMetadata& meta, const fs::path& path);
 };

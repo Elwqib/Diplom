@@ -1490,18 +1490,6 @@
 			"value" : "C:/vcpkg/vcpkg/installed/x64-windows/share/boost_winapi"
 		},
 		{
-			"name" : "duckx_DIR",
-			"properties" : 
-			[
-				{
-					"name" : "HELPSTRING",
-					"value" : "The directory containing a CMake configuration file for duckx."
-				}
-			],
-			"type" : "PATH",
-			"value" : "C:/vcpkg/vcpkg/installed/x64-windows/share/duckx"
-		},
-		{
 			"name" : "exiv2_DIR",
 			"properties" : 
 			[
@@ -1514,18 +1502,6 @@
 			"value" : "C:/vcpkg/vcpkg/installed/x64-windows/share/exiv2"
 		},
 		{
-			"name" : "libzip_DIR",
-			"properties" : 
-			[
-				{
-					"name" : "HELPSTRING",
-					"value" : "The directory containing a CMake configuration file for libzip."
-				}
-			],
-			"type" : "PATH",
-			"value" : "C:/vcpkg/vcpkg/installed/x64-windows/share/libzip"
-		},
-		{
 			"name" : "nlohmann_json_DIR",
 			"properties" : 
 			[
@@ -1536,18 +1512,6 @@
 			],
 			"type" : "PATH",
 			"value" : "C:/vcpkg/vcpkg/installed/x64-windows/share/nlohmann_json"
-		},
-		{
-			"name" : "pugixml_DIR",
-			"properties" : 
-			[
-				{
-					"name" : "HELPSTRING",
-					"value" : "The directory containing a CMake configuration file for pugixml."
-				}
-			],
-			"type" : "PATH",
-			"value" : "C:/vcpkg/vcpkg/installed/x64-windows/share/pugixml"
 		},
 		{
 			"name" : "taglib_DIR",
