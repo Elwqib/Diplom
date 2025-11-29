@@ -15,6 +15,8 @@ find_package(Boost REQUIRED COMPONENTS filesystem)
 find_package(taglib CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(exiv2 CONFIG REQUIRED)
+find_package(cpr CONFIG REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 add_executable(${PROJECT_NAME}
     src/main.cpp
@@ -26,6 +28,8 @@ add_executable(${PROJECT_NAME}
     src/analyzers/ZipAnalyzer.cpp
     src/analyzers/PsdAnalyzer.cpp 
     src/analyzers/Mp4Analyzer.cpp 
+    src/utils/IntegrityChecker.cpp
+    src/utils/VirusTotalChecker.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE
@@ -38,6 +42,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     TagLib::TagLib
     nlohmann_json::nlohmann_json
     exiv2lib            
+    cpr::cpr
+    OpenSSL::SSL
+    OpenSSL::Crypto
 )
 
 if(MSVC)

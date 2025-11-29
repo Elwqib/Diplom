@@ -28,6 +28,12 @@
     <ClCompile Include="C:\Users\аро\Desktop\Prorgrams\DIPLOM_CMAKE_0.0.2\src\analyzers\Mp4Analyzer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\аро\Desktop\Prorgrams\DIPLOM_CMAKE_0.0.2\src\utils\IntegrityChecker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\аро\Desktop\Prorgrams\DIPLOM_CMAKE_0.0.2\src\utils\VirusTotalChecker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="C:\Users\аро\Desktop\Prorgrams\DIPLOM_CMAKE_0.0.2\CMakeLists.txt" />

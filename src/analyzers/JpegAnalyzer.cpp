@@ -1,16 +1,18 @@
 #include "JpegAnalyzer.h"
+
 #include <exiv2/exiv2.hpp>
 #include <algorithm>
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <exception>
 
 bool JpegAnalyzer::canAnalyze(const fs::path& path) const {
     std::string ext = path.extension().string();
     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-    // JPEG + PNG + TIFF (расширяем поддержку)
-    return ext == ".jpg" || ext == ".jpeg" ||
-           ext == ".png" || ext == ".tif"  || ext == ".tiff";
+
+    // Ограничимся нормальными JPEG
+    return ext == ".jpg" || ext == ".jpeg";
 }
 
 FileMetadata JpegAnalyzer::analyze(const fs::path& path) {
@@ -21,9 +23,10 @@ FileMetadata JpegAnalyzer::analyze(const fs::path& path) {
     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
 
     try {
-        Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(path.u8string());
+        // path.string() — чтобы не упасть на путях в Windows
+        Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(path.string());
         if (!image) {
-            meta.setError("Не удалось открыть изображение");
+            meta.set("EXIF", "Не удалось открыть изображение для чтения метаданных");
             return meta;
         }
 
@@ -32,14 +35,16 @@ FileMetadata JpegAnalyzer::analyze(const fs::path& path) {
         const Exiv2::IptcData& iptc = image->iptcData();
         const Exiv2::XmpData&  xmp  = image->xmpData();
 
+        // Вообще нет метаданных
         if (exif.begin() == exif.end() &&
             iptc.begin() == iptc.end() &&
             xmp.begin()  == xmp.end())
         {
-            meta.set("Метаданные", "Отсутствуют");
+            meta.set("Метаданные", "Отсутствуют (файл не содержит EXIF/IPTC/XMP)");
             return meta;
         }
 
+        // Удобный доступ к EXIF по ключу
         auto get = [&](const std::string& key) -> std::string {
             Exiv2::ExifKey k(key);
             Exiv2::ExifData::const_iterator it = exif.findKey(k);
@@ -52,25 +57,37 @@ FileMetadata JpegAnalyzer::analyze(const fs::path& path) {
             if (!val.empty()) meta.set(title, val);
         };
 
-        // Базовые поля EXIF
-        setIf("Дата съёмки",        "Exif.Photo.DateTimeOriginal");
-        setIf("Камера",             "Exif.Image.Make");
-        setIf("Модель камеры",      "Exif.Image.Model");
-        setIf("ISO",                "Exif.Photo.ISOSpeedRatings");
-        setIf("Выдержка",           "Exif.Photo.ExposureTime");
-        setIf("Диафрагма",          "Exif.Photo.FNumber");
-        setIf("Фокусное расстояние","Exif.Photo.FocalLength");
+        // ==== БАЗОВЫЕ ПОЛЯ EXIF (по-русски) ====
+        setIf("Дата съёмки",               "Exif.Photo.DateTimeOriginal");
+        setIf("Дата оцифровки",            "Exif.Photo.DateTimeDigitized");
+        setIf("Камера (производитель)",    "Exif.Image.Make");
+        setIf("Модель камеры",             "Exif.Image.Model");
+        setIf("ISO",                       "Exif.Photo.ISOSpeedRatings");
+        setIf("Выдержка",                  "Exif.Photo.ExposureTime");
+        setIf("Диафрагма (F-число)",       "Exif.Photo.FNumber");
+        setIf("Программа экспозиции",      "Exif.Photo.ExposureProgram");
+        setIf("Режим замера экспозиции",   "Exif.Photo.MeteringMode");
+        setIf("Тип сцены",                 "Exif.Photo.SceneCaptureType");
+        setIf("Фокусное расстояние",       "Exif.Photo.FocalLength");
+        setIf("Программное обеспечение",   "Exif.Image.Software");
+        setIf("Ширина изображения (px)",   "Exif.Photo.PixelXDimension");
+        setIf("Высота изображения (px)",   "Exif.Photo.PixelYDimension");
 
-        // GPS
+        // ==== GPS: явная метка + сами координаты ====
         std::string lat    = get("Exif.GPSInfo.GPSLatitude");
         std::string lon    = get("Exif.GPSInfo.GPSLongitude");
         std::string latRef = get("Exif.GPSInfo.GPSLatitudeRef");
         std::string lonRef = get("Exif.GPSInfo.GPSLongitudeRef");
+
         if (!lat.empty() && !lon.empty()) {
-            meta.set("Геолокация", latRef + " " + lat + ", " + lonRef + " " + lon);
+            meta.set("Содержит GPS-координаты", true);
+            meta.set("GPS (как в EXIF)",
+                     latRef + " " + lat + ", " + lonRef + " " + lon);
+        } else {
+            meta.set("Содержит GPS-координаты", false);
         }
 
-        // Сырые дампы EXIF/IPTC/XMP (обрезаем по длине)
+        // ==== ОЦЕНКА ОБЪЁМА МЕТАДАННЫХ (без вывода сырого дампа) ====
         std::ostringstream exifDump, iptcDump, xmpDump;
         for (Exiv2::ExifData::const_iterator it = exif.begin(); it != exif.end(); ++it)
             exifDump << it->key() << " = " << it->value() << "\n";
@@ -79,26 +96,18 @@ FileMetadata JpegAnalyzer::analyze(const fs::path& path) {
         for (Exiv2::XmpData::const_iterator it = xmp.begin(); it != xmp.end(); ++it)
             xmpDump << it->key() << " = " << it->value() << "\n";
 
-        auto limitStr = [](const std::string& s) {
-            const std::size_t MAX_LEN = 4000;
-            if (s.size() <= MAX_LEN) return s;
-            return s.substr(0, MAX_LEN) + "... (обрезано)";
-        };
-
         std::string exifStr = exifDump.str();
         std::string iptcStr = iptcDump.str();
         std::string xmpStr  = xmpDump.str();
 
-        if (!exifStr.empty()) meta.set("EXIF (raw)", limitStr(exifStr));
-        if (!iptcStr.empty()) meta.set("IPTC (raw)", limitStr(iptcStr));
-        if (!xmpStr.empty())  meta.set("XMP (raw)",  limitStr(xmpStr));
-
         std::size_t metaBytes = exifStr.size() + iptcStr.size() + xmpStr.size();
         if (metaBytes > 64 * 1024) {
             meta.set("Подозрение: аномально много метаданных (возможное скрытие данных)", true);
+            meta.set("Оценочный объём всех метаданных (байт)",
+                     static_cast<int64_t>(metaBytes));
         }
 
-        // Простая проверка на данные после конца JPEG (признак стего)
+        // ==== ПРОВЕРКА ДАННЫХ ПОСЛЕ КОНЦА JPEG (возможная стеганография) ====
         if (ext == ".jpg" || ext == ".jpeg") {
             std::ifstream in(path, std::ios::binary | std::ios::ate);
             if (in) {
@@ -126,8 +135,10 @@ FileMetadata JpegAnalyzer::analyze(const fs::path& path) {
             }
         }
 
+    } catch (const std::exception& e) {
+        meta.set("EXIF", std::string("Ошибка при чтении метаданных: ") + e.what());
     } catch (...) {
-        meta.setError("Ошибка чтения метаданных (EXIF/IPTC/XMP)");
+        meta.set("EXIF", "Неизвестная ошибка при чтении EXIF/IPTC/XMP");
     }
 
     return meta;

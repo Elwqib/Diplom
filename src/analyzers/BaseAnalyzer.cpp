@@ -1,8 +1,16 @@
 #include "BaseAnalyzer.h"
+#include "utils/IntegrityChecker.h"
+#include "utils/VirusTotalChecker.h"
+
+
 #include <sstream>
 #include <iomanip>
 #include <chrono>
 #include <fstream>
+#include <algorithm> 
+#include <cstdint>   
+
+std::string BaseAnalyzer::vtApiKey;
 
 std::string BaseAnalyzer::formatTime(const fs::file_time_type& ftime) {
     try {
@@ -56,17 +64,36 @@ void BaseAnalyzer::addBasicInfo(FileMetadata& meta, const fs::path& path) {
     try {
         meta.set("Полный путь", path.u8string());
         meta.set("Имя файла", path.filename().u8string());
-        auto size = fs::file_size(path);
-        meta.set("Размер (байт)", static_cast<int64_t>(size));
+        meta.set("Размер (байт)", static_cast<int64_t>(fs::file_size(path)));
         meta.set("Изменён", formatTime(fs::last_write_time(path)));
         meta.set("Расширение", path.extension().u8string());
-        if (size == 0) {
-            meta.set("Файл пустой", true);
+
+        // Глобальная проверка сигнатур
+        std::string ext = path.extension().string();
+        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+
+        if (ext == ".jpg" || ext == ".jpeg")      IntegrityChecker::checkJpeg(meta, path);
+        else if (ext == ".pdf")                   IntegrityChecker::checkPdf(meta, path);
+        else if (ext == ".docx")                  IntegrityChecker::checkDocx(meta, path);
+        else if (ext == ".mp3")                   IntegrityChecker::checkMp3(meta, path);
+        else if (ext == ".wav")                   IntegrityChecker::checkWav(meta, path);
+
+        addIntegrityInfo(meta, path);
+
+        if (!vtApiKey.empty()) {
+            VirusTotalChecker::analyzeFile(meta, path, vtApiKey);
+        }
+        else {
+            meta.set("VirusTotal", "API ключ не задан");
         }
 
-        // здесь же добавляем базовую проверку целостности
-        addIntegrityInfo(meta, path);
+
     } catch (...) {
         meta.setError("Файл недоступен или повреждён");
     }
+}
+
+
+void BaseAnalyzer::setVirusTotalApiKey(const std::string& key) {
+    vtApiKey = key;
 }
