@@ -14,6 +14,7 @@ public:
     static void checkDocx(FileMetadata& meta, const fs::path& path);
     static void checkMp3(FileMetadata& meta, const fs::path& path);
     static void checkWav(FileMetadata& meta, const fs::path& path);
+    static void checkPng(FileMetadata& meta, const fs::path& path);
 
 private:
     static bool hasMagicBytes(const fs::path& path, const std::vector<uint8_t>& bytes, size_t offset = 0);

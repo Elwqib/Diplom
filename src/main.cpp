@@ -27,6 +27,7 @@
 #include "analyzers/ZipAnalyzer.h"
 #include "analyzers/PsdAnalyzer.h"
 #include "analyzers/Mp4Analyzer.h"
+#include "analyzers/PngAnalyzer.h"
 
 namespace fs = std::filesystem;
 
@@ -83,6 +84,39 @@ void normalizePath(std::string& path) {
     }
     trim(path);
     std::replace(path.begin(), path.end(), '\\', '/');
+}
+
+// ----------------------------------------------------
+// API ключ из файла рядом с .exe (vt_api_key.txt)
+// ----------------------------------------------------
+fs::path getExecutableDir() {
+    wchar_t buf[MAX_PATH]{};
+    DWORD len = GetModuleFileNameW(nullptr, buf, MAX_PATH);
+    if (len == 0 || len >= MAX_PATH) {
+        return fs::current_path();
+    }
+    return fs::path(buf).parent_path();
+}
+
+std::string readTextFileFirstLine(const fs::path& p) {
+    std::ifstream in(p);
+    if (!in) return {};
+    std::string line;
+    std::getline(in, line);
+    trim(line);
+    return line;
+}
+
+bool ensureApiKeyFileExists(const fs::path& p) {
+    if (fs::exists(p)) return true;
+    try {
+        std::ofstream out(p);
+        if (!out) return false;
+        out << "PASTE_YOUR_VIRUSTOTAL_API_KEY_HERE" << "\n";
+        return true;
+    } catch (...) {
+        return false;
+    }
 }
 
 bool isSupportedExtension(const std::string& extLower) {
@@ -265,135 +299,149 @@ int main(int argc, char* argv[]) {
     analyzers.emplace_back(std::make_unique<Mp4Analyzer>());
     analyzers.emplace_back(std::make_unique<ZipAnalyzer>());
     analyzers.emplace_back(std::make_unique<PsdAnalyzer>());
-    
+    analyzers.emplace_back(std::make_unique<PngAnalyzer>());
 
     fs::create_directories("results");
-    
-        while (true) {
-    system("cls");
-    std::cout << "=== АНАЛИЗАТОР МЕТАДАННЫХ v1.0 ===\n\n";
-    std::cout << "1. Анализ одного файла\n";
-    std::cout << "2. Анализ папки (рекурсивно)\n";
-    std::cout << "3. Выход\n";
-    std::cout << "4. Поддерживаемые форматы\n";
 
-    // 5-й пункт + текущий формат на одной строке
-    std::cout << "5. Формат отчёта → ";
-    switch (selectedFormat) {
-        case OutputFormat::Console: std::cout << "Консоль"; break;
-        case OutputFormat::Txt:     std::cout << "TXT";     break;
-        case OutputFormat::Json:    std::cout << "JSON";    break;
-        case OutputFormat::Xml:     std::cout << "XML";     break;
-    }
-    std::cout << "\n";
+    while (true) {
+        system("cls");
+        std::cout << "=== АНАЛИЗАТОР МЕТАДАННЫХ v1.0 ===\n\n";
+        std::cout << "1. Анализ одного файла\n";
+        std::cout << "2. Анализ папки (рекурсивно)\n";
+        std::cout << "3. Выход\n";
+        std::cout << "4. Поддерживаемые форматы\n";
 
-    // 6-й пункт отдельно
-    std::cout << "6. Ввести API ключ VirusTotal\n";
+        // 5-й пункт + текущий формат на одной строке
+        std::cout << "5. Формат отчёта → ";
+        switch (selectedFormat) {
+            case OutputFormat::Console: std::cout << "Консоль"; break;
+            case OutputFormat::Txt:     std::cout << "TXT";     break;
+            case OutputFormat::Json:    std::cout << "JSON";    break;
+            case OutputFormat::Xml:     std::cout << "XML";     break;
+        }
+        std::cout << "\n";
 
-    std::cout << "\nВыбор: ";
+        // 6-й пункт: ЗАГРУЗКА из файла
+        std::cout << "6. Загрузить API ключ VirusTotal \n";
 
-    int choice;
-    if (!(std::cin >> choice)) {
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::this_thread::sleep_for(std::chrono::seconds(2));
-        continue;
-    }
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "\nВыбор: ";
 
-    if (choice == 3) {
-        std::cout << "До свидания!\n";
-        return 0;
-    }
-    if (choice == 4) {
-        printSupportedExtensions();
-        continue;
-    }
-    if (choice == 6) {
-        std::cout << "Введите API ключ VirusTotal: ";
-        std::string key;
-        std::getline(std::cin >> std::ws, key);
-
-        BaseAnalyzer::setVirusTotalApiKey(key);
-        std::cout << "API ключ успешно сохранён!\n";
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        continue;
-    }
-    if (choice == 5) {
-        std::cout << "\n1. Консоль  2. TXT  3. JSON  4. XML\nВыбор: ";
-        int f;
-        if (std::cin >> f && f >= 1 && f <= 4) {
-            selectedFormat = static_cast<OutputFormat>(f - 1);
+        int choice;
+        if (!(std::cin >> choice)) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+            continue;
         }
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        continue;
-    }
-    if (choice != 1 && choice != 2) {
-        std::cout << "Неверный выбор!\n";
-        std::this_thread::sleep_for(std::chrono::seconds(2));
-        continue;
-    }
 
-    std::cout << "\nВведите путь: ";
-    std::string path_str;
-    std::getline(std::cin, path_str);
-    if (path_str.empty()) {
-        std::cout << "Путь не введён\n";
-        std::this_thread::sleep_for(std::chrono::seconds(2));
-        continue;
-    }
-
-    normalizePath(path_str);
-    fs::path root = fs::u8path(path_str);
-
-    std::vector<FileMetadata> results;
-
-    auto processFile = [&](const fs::path& p) {
-        if (!fs::is_regular_file(p)) return;
-
-        std::string ext = p.extension().string();
-        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-
-        if (!isSupportedExtension(ext)) {
-            std::cout << "Пропущен (неподдерживаемый формат): "
-                      << p.filename().u8string() << "\n";
-            return;
+        if (choice == 3) {
+            std::cout << "До свидания!\n";
+            return 0;
         }
+        if (choice == 4) {
+            printSupportedExtensions();
+            continue;
+        }
+        if (choice == 6) {
+            // Берём ключ из файла vt_api_key.txt рядом с .exe
+            const fs::path keyPath = getExecutableDir() / "vt_api_key.txt";
 
-        for (const auto& a : analyzers) {
-            if (a->canAnalyze(p)) {
-                FileMetadata meta = a->analyze(p);
-                results.push_back(meta);
-                std::cout << meta.toString() << "\n\n";
-                break;
+            if (!ensureApiKeyFileExists(keyPath)) {
+                std::cout << "Не удалось создать/открыть файл: " << keyPath.u8string() << "\n";
+                std::cout << "Запустите программу с правами записи или используйте другую папку.\n";
+                std::this_thread::sleep_for(std::chrono::seconds(2));
+                continue;
             }
-        }
-    };
 
-    if (choice == 2 && fs::is_directory(root)) {
-        std::cout << "Рекурсивный анализ папки...\n\n";
-        for (const auto& entry : fs::recursive_directory_iterator(root)) {
-            processFile(entry.path());
+            const std::string key = readTextFileFirstLine(keyPath);
+            if (key.empty() || key == "PASTE_YOUR_VIRUSTOTAL_API_KEY_HERE") {
+                std::cout << "API ключ не найден.\n";
+                std::cout << "Откройте файл и вставьте ключ в первую строку:\n  "
+                          << keyPath.u8string() << "\n";
+                std::this_thread::sleep_for(std::chrono::seconds(2));
+                continue;
+            }
+
+            BaseAnalyzer::setVirusTotalApiKey(key);
+            std::cout << "API ключ загружен из файла: " << keyPath.u8string() << "\n";
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            continue;
         }
-    } else {
-        processFile(root);
+        if (choice == 5) {
+            std::cout << "\n1. Консоль  2. TXT  3. JSON  4. XML\nВыбор: ";
+            int f;
+            if (std::cin >> f && f >= 1 && f <= 4) {
+                selectedFormat = static_cast<OutputFormat>(f - 1);
+            }
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            continue;
+        }
+        if (choice != 1 && choice != 2) {
+            std::cout << "Неверный выбор!\n";
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+            continue;
+        }
+
+        std::cout << "\nВведите путь: ";
+        std::string path_str;
+        std::getline(std::cin, path_str);
+        if (path_str.empty()) {
+            std::cout << "Путь не введён\n";
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+            continue;
+        }
+
+        normalizePath(path_str);
+        fs::path root = fs::u8path(path_str);
+
+        std::vector<FileMetadata> results;
+
+        auto processFile = [&](const fs::path& p) {
+            if (!fs::is_regular_file(p)) return;
+
+            std::string ext = p.extension().string();
+            std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+
+            if (!isSupportedExtension(ext)) {
+                std::cout << "Пропущен (неподдерживаемый формат): "
+                          << p.filename().u8string() << "\n";
+                return;
+            }
+
+            for (const auto& a : analyzers) {
+                if (a->canAnalyze(p)) {
+                    FileMetadata meta = a->analyze(p);
+                    results.push_back(meta);
+                    std::cout << meta.toString() << "\n\n";
+                    break;
+                }
+            }
+        };
+
+        if (choice == 2 && fs::is_directory(root)) {
+            std::cout << "Рекурсивный анализ папки...\n\n";
+            for (const auto& entry : fs::recursive_directory_iterator(root)) {
+                processFile(entry.path());
+            }
+        } else {
+            processFile(root);
+        }
+
+        if (selectedFormat != OutputFormat::Console) {
+            std::cout << "\nВведите имя файла отчёта (без расширения).\n"
+                         "Оставьте пустым, чтобы использовать имя по умолчанию: ";
+            std::string reportName;
+            std::getline(std::cin, reportName);
+
+            saveResults(results, path_str, selectedFormat, reportName);
+        }
+
+        std::cout << "\nГотово! Обработано файлов: " << results.size() << "\n";
+        std::cout << "Нажмите Enter для продолжения...";
+        std::cin.get();
     }
 
-    if (selectedFormat != OutputFormat::Console) {
-        std::cout << "\nВведите имя файла отчёта (без расширения).\n"
-                     "Оставьте пустым, чтобы использовать имя по умолчанию: ";
-        std::string reportName;
-        std::getline(std::cin, reportName);
-
-        saveResults(results, path_str, selectedFormat, reportName);
-    }
-
-    std::cout << "\nГотово! Обработано файлов: " << results.size() << "\n";
-    std::cout << "Нажмите Enter для продолжения...";
-    std::cin.get();
-}
-
-return 0;
-
+    return 0;
 }

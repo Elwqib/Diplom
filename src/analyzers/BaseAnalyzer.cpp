@@ -77,6 +77,7 @@ void BaseAnalyzer::addBasicInfo(FileMetadata& meta, const fs::path& path) {
         else if (ext == ".docx")                  IntegrityChecker::checkDocx(meta, path);
         else if (ext == ".mp3")                   IntegrityChecker::checkMp3(meta, path);
         else if (ext == ".wav")                   IntegrityChecker::checkWav(meta, path);
+        else if (ext == ".png")                   IntegrityChecker::checkPng(meta, path);
 
         addIntegrityInfo(meta, path);
 

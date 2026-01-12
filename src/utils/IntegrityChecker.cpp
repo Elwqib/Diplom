@@ -109,3 +109,17 @@ void IntegrityChecker::checkWav(FileMetadata& meta, const fs::path& path) {
         meta.setError("Повреждённый WAV: нет RIFF/WAVE");
     }
 }
+
+void IntegrityChecker::checkPng(FileMetadata& meta, const fs::path& path) {
+    if (!hasMagicBytes(path, {0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n'})) {
+        meta.setError("Повреждённый PNG: нет сигнатуры 89 PNG");
+        return;
+    }
+
+    // Проверка на наличие CRC в конце
+    if (!hasBytesAtEnd(path, {0x49, 'E', 'N', 'D', 0xAE, 0x42, 0x60, 0x82})) {
+        meta.set("Целостность PNG", "Предупреждение: отсутствует маркер конца (IEND)");
+    } else {
+        meta.set("Целостность PNG", "Валидный");
+    }
+}

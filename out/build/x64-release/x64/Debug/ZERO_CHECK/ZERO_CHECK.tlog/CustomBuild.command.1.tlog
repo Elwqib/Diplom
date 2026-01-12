@@ -1,6 +1,6 @@
-^C:\USERS\АРО\DESKTOP\PRORGRAMS\DIPLOM_CMAKE_0.0.2\OUT\BUILD\X64-RELEASE\CMAKEFILES\E6FAD1F33BF5D55F98090B2A6C20ABBB\GENERATE.STAMP.RULE
+^C:\USERS\АРО\DESKTOP\DIPLOM_CMAKE_0.0.2\OUT\BUILD\X64-RELEASE\CMAKEFILES\FB10B7FE9F4504242E01A4BD5DB577B2\GENERATE.STAMP.RULE
 setlocal
-"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:/Users/аро/Desktop/Prorgrams/DIPLOM_CMAKE_0.0.2 -BC:/Users/аро/Desktop/Prorgrams/DIPLOM_CMAKE_0.0.2/out/build/x64-release --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/аро/Desktop/Prorgrams/DIPLOM_CMAKE_0.0.2/out/build/x64-release/MetadataAnalyzer.sln
+"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:/Users/аро/Desktop/DIPLOM_CMAKE_0.0.2 -BC:/Users/аро/Desktop/DIPLOM_CMAKE_0.0.2/out/build/x64-release --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/аро/Desktop/DIPLOM_CMAKE_0.0.2/out/build/x64-release/MetadataAnalyzer.sln
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone

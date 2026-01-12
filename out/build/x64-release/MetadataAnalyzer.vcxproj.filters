@@ -1,49 +1,52 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Users\аро\Desktop\Prorgrams\DIPLOM_CMAKE_0.0.2\src\main.cpp">
+    <ClCompile Include="C:\Users\аро\Desktop\DIPLOM_CMAKE_0.0.2\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\аро\Desktop\Prorgrams\DIPLOM_CMAKE_0.0.2\src\analyzers\BaseAnalyzer.cpp">
+    <ClCompile Include="C:\Users\аро\Desktop\DIPLOM_CMAKE_0.0.2\src\analyzers\BaseAnalyzer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\аро\Desktop\Prorgrams\DIPLOM_CMAKE_0.0.2\src\analyzers\JpegAnalyzer.cpp">
+    <ClCompile Include="C:\Users\аро\Desktop\DIPLOM_CMAKE_0.0.2\src\analyzers\JpegAnalyzer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\аро\Desktop\Prorgrams\DIPLOM_CMAKE_0.0.2\src\analyzers\AudioAnalyzer.cpp">
+    <ClCompile Include="C:\Users\аро\Desktop\DIPLOM_CMAKE_0.0.2\src\analyzers\AudioAnalyzer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\аро\Desktop\Prorgrams\DIPLOM_CMAKE_0.0.2\src\analyzers\PdfAnalyzer.cpp">
+    <ClCompile Include="C:\Users\аро\Desktop\DIPLOM_CMAKE_0.0.2\src\analyzers\PdfAnalyzer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\аро\Desktop\Prorgrams\DIPLOM_CMAKE_0.0.2\src\analyzers\DocxAnalyzer.cpp">
+    <ClCompile Include="C:\Users\аро\Desktop\DIPLOM_CMAKE_0.0.2\src\analyzers\DocxAnalyzer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\аро\Desktop\Prorgrams\DIPLOM_CMAKE_0.0.2\src\analyzers\ZipAnalyzer.cpp">
+    <ClCompile Include="C:\Users\аро\Desktop\DIPLOM_CMAKE_0.0.2\src\analyzers\ZipAnalyzer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\аро\Desktop\Prorgrams\DIPLOM_CMAKE_0.0.2\src\analyzers\PsdAnalyzer.cpp">
+    <ClCompile Include="C:\Users\аро\Desktop\DIPLOM_CMAKE_0.0.2\src\analyzers\PsdAnalyzer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\аро\Desktop\Prorgrams\DIPLOM_CMAKE_0.0.2\src\analyzers\Mp4Analyzer.cpp">
+    <ClCompile Include="C:\Users\аро\Desktop\DIPLOM_CMAKE_0.0.2\src\analyzers\Mp4Analyzer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\аро\Desktop\Prorgrams\DIPLOM_CMAKE_0.0.2\src\utils\IntegrityChecker.cpp">
+    <ClCompile Include="C:\Users\аро\Desktop\DIPLOM_CMAKE_0.0.2\src\analyzers\PngAnalyzer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\аро\Desktop\Prorgrams\DIPLOM_CMAKE_0.0.2\src\utils\VirusTotalChecker.cpp">
+    <ClCompile Include="C:\Users\аро\Desktop\DIPLOM_CMAKE_0.0.2\src\utils\IntegrityChecker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\аро\Desktop\DIPLOM_CMAKE_0.0.2\src\utils\VirusTotalChecker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\аро\Desktop\Prorgrams\DIPLOM_CMAKE_0.0.2\CMakeLists.txt" />
+    <CustomBuild Include="C:\Users\аро\Desktop\DIPLOM_CMAKE_0.0.2\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="C:\vcpkg\vcpkg\installed\x64-windows\share\nlohmann_json\nlohmann_json.natvis" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{948FC337-9B90-36CA-B667-A5A9F5A2E949}</UniqueIdentifier>
+      <UniqueIdentifier>{14C8366E-07DF-30B8-AC48-A05CAEEB7AC1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

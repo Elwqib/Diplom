@@ -2,10 +2,10 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\аро\Desktop\Prorgrams\DIPLOM_CMAKE_0.0.2\out\build\x64-release\x64\Debug\ZERO_CHECK</FullPath>
+      <FullPath>C:\Users\аро\Desktop\DIPLOM_CMAKE_0.0.2\out\build\x64-release\x64\Debug\ZERO_CHECK</FullPath>
     </ProjectOutput>
     <ProjectOutput>
-      <FullPath>C:\Users\аро\Desktop\Prorgrams\DIPLOM_CMAKE_0.0.2\out\build\x64-release\Debug\MetadataAnalyzer.exe</FullPath>
+      <FullPath>C:\Users\аро\Desktop\DIPLOM_CMAKE_0.0.2\out\build\x64-release\Debug\MetadataAnalyzer.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />
